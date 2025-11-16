@@ -40,12 +40,51 @@ const ConferenceEvent = () => {
 
     const getItemsFromTotalCost = () => {
         const items = [];
+        // Add venue items with quantity > 0
+        venueItems.forEach((item) => {
+            if (item.quantity > 0) {
+                items.push({
+                    name: item.name,
+                    quantity: item.quantity,
+                    cost: item.cost,
+                    total: item.cost * item.quantity,
+                    section: "venue"
+                });
+            }
+        });
+        return items;
     };
 
     const items = getItemsFromTotalCost();
 
     const ItemsDisplay = ({ items }) => {
-
+        if (!items || items.length === 0) {
+            return <div>No items selected</div>;
+        }
+        return (
+            <div className="items_view">
+                <table className="table_item_data">
+                    <thead>
+                        <tr>
+                            <th>Item</th>
+                            <th>Quantity</th>
+                            <th>Cost per Unit</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {items.map((item, index) => (
+                            <tr key={index}>
+                                <td>{item.name}</td>
+                                <td>{item.quantity}</td>
+                                <td>${item.cost}</td>
+                                <td>${item.total}</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+        );
     };
     const calculateTotalCost = (section) => {
         let totalCost = 0;
@@ -57,6 +96,14 @@ const ConferenceEvent = () => {
         return totalCost;
       };
     const venueTotalCost = calculateTotalCost("venue");
+    
+    // Create totalCosts object for TotalCost component
+    const totalCosts = {
+        venue: venueTotalCost,
+        addons: 0, // Will be updated when addons are implemented
+        meals: 0,  // Will be updated when meals are implemented
+        total: venueTotalCost // Total of all sections
+    };
 
     const navigateToProducts = (idType) => {
         if (idType == '#venue' || idType == '#addons' || idType == '#meals') {
