@@ -54,8 +54,36 @@ const ConferenceEvent = () => {
                     quantity: item.quantity,
                     cost: item.cost,
                     total: item.cost * item.quantity,
-                    section: "venue"
+                    type: "venue"
                 });
+            }
+        });
+        // Add add-ons (av) items with quantity > 0
+        avItems.forEach((item) => {
+            if (item.quantity > 0 && !items.find(existingItem => existingItem.name === item.name && existingItem.type === "av")) {
+                items.push({
+                    name: item.name,
+                    quantity: item.quantity,
+                    cost: item.cost,
+                    total: item.cost * item.quantity,
+                    type: "av"
+                });
+            }
+        });
+        // Add selected meal items
+        mealsItems.forEach((item) => {
+            if (item.selected) {
+                const itemForDisplay = {
+                    name: item.name,
+                    quantity: numberOfPeople,
+                    cost: item.cost,
+                    total: item.cost * numberOfPeople,
+                    type: "meals"
+                };
+                if (numberOfPeople) {
+                    itemForDisplay.numberOfPeople = numberOfPeople;
+                }
+                items.push(itemForDisplay);
             }
         });
         return items;
@@ -64,31 +92,45 @@ const ConferenceEvent = () => {
     const items = getItemsFromTotalCost();
 
     const ItemsDisplay = ({ items }) => {
-        if (!items || items.length === 0) {
-            return <div>No items selected</div>;
-        }
+        console.log(items);
         return (
-            <div className="items_view">
-                <table className="table_item_data">
-                    <thead>
-                        <tr>
-                            <th>Item</th>
-                            <th>Quantity</th>
-                            <th>Cost per Unit</th>
-                            <th>Total</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {items.map((item, index) => (
-                            <tr key={index}>
-                                <td>{item.name}</td>
-                                <td>{item.quantity}</td>
-                                <td>${item.cost}</td>
-                                <td>${item.total}</td>
+            <div className="display_box1">
+                {items.length === 0 ? (
+                    <p>No items selected</p>
+                ) : (
+                    <table className="table_item_data">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Unit Cost</th>
+                                <th>Quantity</th>
+                                <th>Subtotal</th>
                             </tr>
-                        ))}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            {items.map((item, index) => (
+                                <tr key={index}>
+                                    <td>{item.name}</td>
+                                    <td>${item.cost}</td>
+                                    <td>
+                                        {item.type === "meals" || item.numberOfPeople ? (
+                                            `For ${item.numberOfPeople} people`
+                                        ) : (
+                                            item.quantity
+                                        )}
+                                    </td>
+                                    <td>
+                                        ${item.type === "meals" || item.numberOfPeople ? (
+                                            item.cost * item.numberOfPeople
+                                        ) : (
+                                            item.cost * item.quantity
+                                        )}
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                )}
             </div>
         );
     };
@@ -118,9 +160,8 @@ const ConferenceEvent = () => {
     // Create totalCosts object for TotalCost component
     const totalCosts = {
         venue: venueTotalCost,
-        addons: 0, // Will be updated when addons are implemented
-        meals: 0,  // Will be updated when meals are implemented
-        total: venueTotalCost // Total of all sections
+        av: avTotalCost,
+        meals: mealsTotalCost,
     };
 
     const navigateToProducts = (idType) => {
